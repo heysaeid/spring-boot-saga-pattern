@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class CreatePaymentEventDTO {
+public class CreatePaymentDTO {
     private Long orderId;
     public Float amount;
 }

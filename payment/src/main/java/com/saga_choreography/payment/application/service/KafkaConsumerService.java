@@ -3,7 +3,7 @@ package com.saga_choreography.payment.application.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saga_choreography.payment.application.dto.CancelPaymentDTO;
-import com.saga_choreography.payment.application.dto.CreatePaymentEventDTO;
+import com.saga_choreography.payment.application.dto.CreatePaymentDTO;
 import com.saga_choreography.payment.domain.entity.Payment;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
@@ -22,12 +22,18 @@ public class KafkaConsumerService {
 
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @KafkaListener(topics = createPaymentTopic, groupId = createPaymentTopic + "-grp")
-    public void consumeCreatePayment(CreatePaymentEventDTO message) throws JsonProcessingException{
-        String jsonString = new ObjectMapper().writeValueAsString(message);
-        //CreatePaymentDTO paymentDTO = paymentService.createPayment(createPaymentDTO);
-        logger.info("New payment created: " + message);
+    public void consumeCreatePayment(String message) {
+        try {
+            CreatePaymentDTO createPaymentDTO = objectMapper.readValue(message, CreatePaymentDTO.class);
+            paymentService.createPayment(createPaymentDTO);
+            logger.info("New payment created: " + createPaymentDTO);
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to deserialize message", e);
+        }
     }
 
     @KafkaListener(topics = cancelPaymentTopic, groupId = cancelPaymentTopic + "-grp")

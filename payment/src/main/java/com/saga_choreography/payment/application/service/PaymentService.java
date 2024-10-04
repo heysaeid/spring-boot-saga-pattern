@@ -2,8 +2,8 @@ package com.saga_choreography.payment.application.service;
 
 import com.saga_choreography.payment.application.dto.CancelOrderEventDTO;
 import com.saga_choreography.payment.application.dto.ConfirmedOrderEventDTO;
-import com.saga_choreography.payment.application.dto.CreatePaymentEventDTO;
-import com.saga_choreography.payment.application.mapper.CreatePaymentEventMapper;
+import com.saga_choreography.payment.application.dto.CreatePaymentDTO;
+import com.saga_choreography.payment.application.mapper.CreatePaymentMapper;
 import com.saga_choreography.payment.domain.entity.Payment;
 import com.saga_choreography.payment.domain.entity.PaymentStatus;
 import com.saga_choreography.payment.domain.repository.PaymentRepository;
@@ -19,14 +19,13 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
-    private CreatePaymentEventMapper
-            createPaymentEventMapper;
+    private CreatePaymentMapper createPaymentMapper;
 
-    public CreatePaymentEventDTO createPayment(CreatePaymentEventDTO createPaymentDTO) {
-        Payment payment = createPaymentEventMapper.createPaymentEventDTOToPayment(createPaymentDTO);
+    public CreatePaymentDTO createPayment(CreatePaymentDTO createPaymentDTO) {
+        Payment payment = createPaymentMapper.createPaymentDTOToPayment(createPaymentDTO);
         Payment savedPayment = paymentRepository.save(payment);
 
-        return createPaymentEventMapper.paymentToCreatePaymentEventDTO(savedPayment);
+        return createPaymentMapper.paymentToCreatePaymentDTO(savedPayment);
     }
 
     public Payment confirmedPayment(Long paymentId) {

@@ -1,10 +1,9 @@
 package com.saga_choreography.order.application.service;
 
-import com.saga_choreography.order.application.dto.cancelOrderDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saga_choreography.order.application.dto.CancelOrderDTO;
 import com.saga_choreography.order.domain.entity.Order;
-
-
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +15,20 @@ public class KafkaConsumerService {
 
     @Autowired
     private OrderService orderService;
-    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
+    @Autowired
+    private ObjectMapper objectMapper;
+    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
     private static final String CANCEL_ORDER_TOPIC = "cancel-order";
 
     @KafkaListener(topics = CANCEL_ORDER_TOPIC, groupId = CANCEL_ORDER_TOPIC + "-grp")
-    public void consumeCancelOrder(cancelOrderDTO cancelOrderDTO) {
-        Order order = orderService.cancelOrder(cancelOrderDTO.getOrderId());
-        logger.info(
-            String.format("The order was cancelled: " + order)
-        );
+    public void consumeCancelOrder(String message) {
+        try {
+            CancelOrderDTO cancelOrderDTO = objectMapper.readValue(message, CancelOrderDTO.class);
+            Order order = orderService.cancelOrder(cancelOrderDTO.getOrderId());
+            logger.info("The order was cancelled: {}", order);
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to deserialize message: {}", e.getMessage());
+        }
     }
 
 }
